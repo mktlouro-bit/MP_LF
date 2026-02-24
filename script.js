@@ -1,5 +1,5 @@
 // O URL de exportação CSV do seu Google Sheet.
-// Ele é construído a partir do ID do seu sheet e do GID da folha (0 para a primeira folha).
+// Ele é construído a partir do ID do seu sheet e do GID da folha (654429644 para "2026").
 const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cM20IYXbhuPhH3Z_3S-6jYXilL6nCGwL/gviz/tq?tqx=out:csv&gid=654429644';
 
 // Intervalo de atualização: 5 minutos em milissegundos
@@ -20,19 +20,16 @@ async function fetchData() {
         const { data, errors } = Papa.parse(csvText, {
             header: true,         // A primeira linha é o cabeçalho
             skipEmptyLines: true, // Ignorar linhas vazias
-            trimHeaders: true,     // Remover espaços em branco dos nomes dos cabeçalhos
-            delimiter: ';'         // <--- ALTERAÇÃO AQUI: Forçar o delimitador a ser ponto e vírgula
+            trimHeaders: true     // Remover espaços em branco dos nomes dos cabeçalhos
+            // REMOVIDO: delimiter: ';' -- Deixa o PapaParse auto-detetar (ele usará vírgula por padrão)
         });
 
         if (errors.length > 0) {
             console.error('Erros ao analisar CSV:', errors);
-            // Mostrar aviso no dashboard se houver erros de parsing, a menos que seja apenas o delimitador
-            // Para este erro específico, podemos ignorá-lo se os dados foram realmente parseados
-            const nonDelimiterErrors = errors.filter(err => err.code !== 'UndetectableDelimiter');
-            if (nonDelimiterErrors.length > 0) {
-                document.getElementById('last-updated').textContent = "Erro ao carregar dados!";
-                return null;
-            }
+            // Mostrar aviso no dashboard se houver erros de parsing
+            // Deixamos a mensagem de erro para debug, mas não bloqueamos o dashboard completamente
+            document.getElementById('last-updated').textContent = "Erro ao carregar dados! (Consulte a consola)";
+            return null; // Retorna nulo se houver erros críticos
         }
 
         console.log('Dados brutos do CSV:', data); // Para depuração
@@ -57,7 +54,7 @@ function processData(rawData) {
         // Ignorar linhas que não têm um número de comunicação válido ou são incompletas
         // Nota: as chaves são os nomes das colunas EXACTAS do seu Google Sheet
         if (!row['Nº'] || !row['Data comunicação'] || !row['Estado']) {
-            // console.warn('Linha ignorada devido a dados essenciais incompletos:', row); // Manter para depuração se necessário
+            console.warn('Linha ignorada devido a dados essenciais incompletos:', row); 
             return;
         }
 
@@ -86,7 +83,7 @@ function processData(rawData) {
                 // Assumimos como NOK, conforme os critérios iniciais para "Sem resposta" ou "não identificadas as causas"
                 resolvidosNOK++;
                 finalStatus = 'NOK';
-                // console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NO' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
+                console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NO' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
             }
         }
         
