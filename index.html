@@ -17,51 +17,57 @@
     </header>
 
     <main id="dashboard-container">
-        <!-- KPIs Principais -->
-        <div class="kpi-card">
-            <h2>Casos Totais</h2>
-            <p id="kpi-total-casos" class="kpi-value kpi-total"></p>
-        </div>
-        <div class="kpi-card">
-            <h2>Abertos</h2>
-            <p id="kpi-abertos" class="kpi-value kpi-aberto"></p>
-        </div>
-        <div class="kpi-card">
-            <h2>Resolvidos OK</h2>
-            <p id="kpi-ok" class="kpi-value kpi-ok"></p>
-        </div>
-        <div class="kpi-card">
-            <h2>Resolvidos NOK</h2>
-            <p id="kpi-nok" class="kpi-value kpi-nok"></p>
-        </div>
+        <!-- Secção de KPIs Principais -->
+        <section class="kpi-section">
+            <div class="kpi-card large-kpi total-casos">
+                <h2>Total de Casos</h2>
+                <p id="kpi-total-casos" class="kpi-value"></p>
+            </div>
+            <div class="kpi-card large-kpi abertos-kpi">
+                <h2>Casos Abertos</h2>
+                <p id="kpi-abertos" class="kpi-value"></p>
+            </div>
+            <div class="kpi-card small-kpi ok-kpi">
+                <h2>Resolvidos OK</h2>
+                <p id="kpi-ok" class="kpi-value"></p>
+            </div>
+            <div class="kpi-card small-kpi nok-kpi">
+                <h2>Resolvidos NOK</h2>
+                <p id="kpi-nok" class="kpi-value"></p>
+            </div>
+        </section>
 
-        <!-- Gráficos -->
-        <div class="chart-panel">
-            <h2>Distribuição de Status</h2>
-            <canvas id="statusChart"></canvas>
-        </div>
-        <div class="chart-panel">
-            <h2>Reclamações por Fornecedor (Top 5)</h2>
-            <canvas id="fornecedorChart"></canvas>
-        </div>
+        <!-- Secção de Gráficos -->
+        <section class="chart-section">
+            <div class="chart-panel">
+                <h2>Distribuição de Status</h2>
+                <canvas id="statusChart"></canvas>
+            </div>
+            <div class="chart-panel">
+                <h2>Top 5 Fornecedores</h2>
+                <canvas id="fornecedorChart"></canvas>
+            </div>
+        </section>
         
         <!-- Tabela de Casos Recentes -->
-        <div class="table-panel">
-            <h2>Casos Abertos Recentes</h2>
-            <table id="recentCasesTable">
-                <thead>
-                    <tr>
-                        <th>Data Com.</th>
-                        <th>Fornecedor</th>
-                        <th>Motivo</th>
-                        <th>Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Linhas da tabela serão preenchidas por JavaScript -->
-                </tbody>
-            </table>
-        </div>
+        <section class="table-section">
+            <div class="table-panel">
+                <h2>Casos Abertos Recentes</h2>
+                <table id="recentCasesTable">
+                    <thead>
+                        <tr>
+                            <th>Data Com.</th>
+                            <th>Fornecedor</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Linhas da tabela serão preenchidas por JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <script src="script.js"></script>

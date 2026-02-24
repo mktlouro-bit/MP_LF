@@ -1,140 +1,190 @@
 :root {
-    --bg-color: #f0f2f5;
-    --card-bg: #ffffff;
-    --text-color: #333;
-    --header-bg: #007bff;
+    --bg-color: #f0f2f5;           /* Fundo mais suave */
+    --card-bg: #ffffff;            /* Fundo branco para cartões */
+    --text-color: #333;            /* Texto principal */
+    --header-bg: #2196F3;          /* Azul mais profissional para o cabeçalho */
     --header-text: #ffffff;
-    --kpi-ok: #28a745;
-    --kpi-nok: #dc3545;
-    --kpi-aberto: #ffc107;
-    --kpi-total: #6c757d;
+    
+    --kpi-ok: #4CAF50;             /* Verde mais forte para OK */
+    --kpi-nok: #F44336;            /* Vermelho mais forte para NOK */
+    --kpi-aberto: #FFC107;         /* Laranja para Aberto */
+    --kpi-total: #607D8B;          /* Azul acinzentado para Total */
+
+    --border-radius: 8px;
+    --box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Fonte mais profissional */
     margin: 0;
     background-color: var(--bg-color);
     color: var(--text-color);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-size: 16px; /* Tamanho base da fonte */
 }
 
 header {
     background-color: var(--header-bg);
     color: var(--header-text);
-    padding: 20px 15px;
+    padding: 25px 15px; /* Mais padding */
     text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 20px;
 }
 
 header h1 {
-    margin: 0 0 5px 0;
-    font-size: 1.8em; /* Ajustado para tablet */
+    margin: 0 0 8px 0;
+    font-size: 2.2em; /* Título maior */
+    font-weight: 500;
 }
 
 header p {
-    font-size: 0.9em;
-    opacity: 0.8;
+    font-size: 1em;
+    opacity: 0.9;
+    margin: 0;
 }
 
 #dashboard-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 250px min para tablets */
-    gap: 20px;
+    grid-template-columns: 1fr; /* Por padrão, uma coluna em ecrãs pequenos */
+    gap: 25px; /* Espaçamento maior entre secções */
     padding: 20px;
-    max-width: 1200px;
-    margin: 20px auto;
+    max-width: 1400px; /* Largura máxima */
+    margin: 0 auto;
+}
+
+/* Secções para melhor organização */
+.kpi-section, .chart-section, .table-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsividade dentro da secção */
+    gap: 20px; /* Espaçamento entre cartões/painéis */
 }
 
 .kpi-card, .chart-panel, .table-panel {
     background-color: var(--card-bg);
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Transição para interatividade */
 }
 
-.kpi-card {
-    text-align: center;
+.kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
 }
 
 .kpi-card h2 {
-    font-size: 1.1em;
+    font-size: 1.2em;
     color: #666;
     margin-top: 0;
+    margin-bottom: 10px;
+    font-weight: 400;
 }
 
 .kpi-value {
-    font-size: 2.5em; /* Grande para fácil leitura */
-    font-weight: bold;
-    margin: 10px 0 0 0;
+    font-size: 3em; /* Valor do KPI muito grande */
+    font-weight: 700; /* Negrito */
+    margin: 0;
+    line-height: 1;
 }
 
-.kpi-ok { color: var(--kpi-ok); }
-.kpi-nok { color: var(--kpi-nok); }
-.kpi-aberto { color: var(--kpi-aberto); }
-.kpi-total { color: var(--kpi-total); }
+/* Tamanhos específicos para KPIs */
+.large-kpi { grid-column: span 1; } /* Em mobile, todos 1 coluna */
+.small-kpi { grid-column: span 1; } /* Em mobile, todos 1 coluna */
+
+/* Cores específicas para KPIs */
+.total-casos .kpi-value { color: var(--kpi-total); }
+.abertos-kpi .kpi-value { color: var(--kpi-aberto); }
+.ok-kpi .kpi-value { color: var(--kpi-ok); }
+.nok-kpi .kpi-value { color: var(--kpi-nok); }
+
 
 .chart-panel h2, .table-panel h2 {
-    font-size: 1.2em;
+    font-size: 1.4em;
     margin-top: 0;
-    margin-bottom: 15px;
-    color: #444;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    font-weight: 500;
+    text-align: center;
 }
 
 /* Responsividade para layouts em tablets */
 @media (min-width: 768px) {
     #dashboard-container {
-        grid-template-columns: repeat(2, 1fr); /* 2 colunas para tablets */
+        grid-template-columns: 1fr; /* Ainda 1 coluna principal para as secções */
     }
-    .chart-panel, .table-panel {
-        grid-column: span 1; /* Ocupam uma coluna */
+    .kpi-section {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas para KPIs grandes no tablet */
     }
-    /* Em tablets maiores ou desktops, podem ocupar mais */
-    @media (min-width: 1024px) {
-        #dashboard-container {
-            grid-template-columns: repeat(3, 1fr); /* 3 colunas para desktops */
-        }
-        .chart-panel, .table-panel {
-             grid-column: span 1; /* Ocupam uma coluna */
-        }
-        /* Para o statusChart e talvez a tabela, podemos dar mais largura */
-        .chart-panel:nth-child(5) { /* O quinto elemento (primeiro chart) */
-            grid-column: span 2; 
-        }
-        .table-panel:nth-child(7) { /* O sétimo elemento (tabela) */
-            grid-column: span 3; /* Tabela ocupa toda a largura */
-        }
+    .large-kpi { grid-column: span 1; }
+    .small-kpi { grid-column: span 1; } /* KPIs menores ainda em coluna separada, ou podemos fazer 2x2 */
+    
+    .chart-section {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas para gráficos no tablet */
+    }
+    .table-section {
+        grid-template-columns: 1fr; /* Tabela ocupa a largura total */
     }
 }
+
+/* Responsividade para layouts maiores (desktops ou tablets grandes) */
+@media (min-width: 1024px) {
+    .kpi-section {
+        grid-template-columns: repeat(4, 1fr); /* 4 colunas para todos os KPIs */
+    }
+    .large-kpi { grid-column: span 2; } /* KPIs de total e abertos ocupam 2/4 */
+    .small-kpi { grid-column: span 1; } /* KPIs OK/NOK ocupam 1/4 */
+
+    .chart-section {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas para gráficos */
+    }
+    .table-section {
+        grid-column: span 2; /* A tabela pode ocupar o dobro da largura se necessário */
+    }
+}
+
 
 /* Estilos da tabela */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 15px;
-    font-size: 0.9em;
+    font-size: 0.95em; /* Ligeiramente maior */
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Para cantos arredondados na tabela */
 }
 
 th, td {
-    border: 1px solid #eee;
-    padding: 10px;
+    border-bottom: 1px solid #eee; /* Linha de separação mais fina */
+    padding: 12px 15px; /* Mais padding */
     text-align: left;
 }
 
 th {
-    background-color: #f8f8f8;
-    font-weight: bold;
+    background-color: #f5f5f5;
+    font-weight: 600;
     color: #555;
+    text-transform: uppercase;
+    font-size: 0.85em;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #fbfbfb;
+    background-color: #f9f9f9;
+}
+tbody tr:hover {
+    background-color: #f0f0f0; /* Efeito hover */
 }
 
+/* Classes para cores de status na tabela */
 .table-status-aberto { color: var(--kpi-aberto); font-weight: bold; }
 .table-status-ok { color: var(--kpi-ok); font-weight: bold; }
 .table-status-nok { color: var(--kpi-nok); font-weight: bold; }
+.table-status-desconhecido { color: var(--kpi-total); font-weight: bold; }
