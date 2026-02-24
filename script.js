@@ -1,6 +1,6 @@
 // O URL de exportação CSV do seu Google Sheet.
 // Ele é construído a partir do ID do seu sheet e do GID da folha (0 para a primeira folha).
-const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cM20IYXbhuPhH3Z_3S-6jYXilL6nCGwL/gviz/tq?tqx=out:csv&gid=0';
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cM20IYXbhuPhH3Z_3S-6jYXilL6nCGwL/gviz/tq?tqx=out:csv&gid=654429644';
 
 // Intervalo de atualização: 5 minutos em milissegundos
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
