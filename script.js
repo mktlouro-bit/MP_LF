@@ -1,6 +1,6 @@
 // O URL de exportação CSV do seu Google Sheet.
-// Usamos o GID do separador "2026" que identifiquei na sua folha.
-const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cM20IYXbhuPhH3Z_3S-6jYXilL6nCGwL/gviz/tq?tqx=out:csv&gid=1748247000';
+// Ele é construído a partir do ID do seu sheet e do GID da folha (0 para a primeira folha).
+const GOOGLE_SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cM20IYXbhuPhH3Z_3S-6jYXilL6nCGwL/gviz/tq?tqx=out:csv&gid=0';
 
 // Intervalo de atualização: 5 minutos em milissegundos
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
@@ -16,32 +16,26 @@ async function fetchData() {
         }
         const csvText = await response.text();
 
-        // Dividimos o CSV em linhas.
-        const lines = csvText.split('\n');
-        // A imagem mostra que os cabeçalhos reais estão na 4ª linha (índice 3, se começarmos a contar do 0).
-        // Ignoramos as primeiras 3 linhas para que o PapaParse encontre os cabeçalhos corretos.
-        const headerRowIndex = 3; 
-        const dataLines = lines.slice(headerRowIndex).join('\n'); // Juntar as linhas restantes de volta num string CSV
-
-        // Usar Papaparse para ler os dados a partir da linha dos cabeçalhos
-        const { data, errors } = Papa.parse(dataLines, {
-            header: true,         // A primeira linha do 'dataLines' é o cabeçalho
+        // Usar Papaparse para ler o CSV
+        const { data, errors } = Papa.parse(csvText, {
+            header: true,         // A primeira linha é o cabeçalho
             skipEmptyLines: true, // Ignorar linhas vazias
-            trimHeaders: true     // Remover espaços em branco dos nomes dos cabeçalhos
+            trimHeaders: true,     // Remover espaços em branco dos nomes dos cabeçalhos
+            delimiter: ';'         // <--- ALTERAÇÃO AQUI: Forçar o delimitador a ser ponto e vírgula
         });
 
         if (errors.length > 0) {
             console.error('Erros ao analisar CSV:', errors);
-            document.getElementById('last-updated').textContent = "Erro ao carregar dados!";
-            return null;
-        }
-        if (data.length === 0) {
-            console.warn('CSV carregado, mas sem linhas de dados para processar.');
-            document.getElementById('last-updated').textContent = "Sem dados para mostrar.";
-            return null;
+            // Mostrar aviso no dashboard se houver erros de parsing, a menos que seja apenas o delimitador
+            // Para este erro específico, podemos ignorá-lo se os dados foram realmente parseados
+            const nonDelimiterErrors = errors.filter(err => err.code !== 'UndetectableDelimiter');
+            if (nonDelimiterErrors.length > 0) {
+                document.getElementById('last-updated').textContent = "Erro ao carregar dados!";
+                return null;
+            }
         }
 
-        console.log('Dados brutos do CSV (após ignorar cabeçalhos):', data); // Para depuração
+        console.log('Dados brutos do CSV:', data); // Para depuração
         return processData(data);
 
     } catch (error) {
@@ -60,18 +54,20 @@ function processData(rawData) {
     const processedCases = [];
 
     rawData.forEach(row => {
-        // Assegurar que temos dados essenciais para esta linha
+        // Ignorar linhas que não têm um número de comunicação válido ou são incompletas
+        // Nota: as chaves são os nomes das colunas EXACTAS do seu Google Sheet
         if (!row['Nº'] || !row['Data comunicação'] || !row['Estado']) {
-            console.warn('Linha ignorada devido a dados essenciais incompletos:', row);
+            // console.warn('Linha ignorada devido a dados essenciais incompletos:', row); // Manter para depuração se necessário
             return;
         }
 
         totalCasos++;
 
-        let finalStatus = 'Desconhecido'; // Estado padrão
+        let finalStatus = 'Desconhecido'; // Estado padrão se não for classificado
 
         const estadoDaReclamacao = row['Estado'].trim().toLowerCase();
         // Usamos a coluna 'Ok/NO' do seu sheet para determinar OK/NOK
+        // Certifique-se que o nome da coluna 'Ok/NO' está correto (case-sensitive)
         const okNoStatus = row['Ok/NO'] ? row['Ok/NO'].trim().toLowerCase() : '';
 
         if (estadoDaReclamacao === 'aberto') {
@@ -90,13 +86,13 @@ function processData(rawData) {
                 // Assumimos como NOK, conforme os critérios iniciais para "Sem resposta" ou "não identificadas as causas"
                 resolvidosNOK++;
                 finalStatus = 'NOK';
-                console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NO' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
+                // console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NO' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
             }
         }
         
         // Contar fornecedores para o gráfico
         const fornecedor = row['Fornecedor'] ? row['Fornecedor'].trim() : 'Desconhecido';
-        if (fornecedor && fornecedor !== 'Desconhecido' && fornecedor !== '') { 
+        if (fornecedor && fornecedor !== 'Desconhecido') { // Só conta se o fornecedor for válido
             fornecedorCounts[fornecedor] = (fornecedorCounts[fornecedor] || 0) + 1;
         }
 
@@ -112,9 +108,10 @@ function processData(rawData) {
     // Ordenar casos recentes por data de comunicação (do mais recente para o mais antigo)
     processedCases.sort((a, b) => {
         const parseDate = (dateStr) => {
-            const parts = dateStr.split('/'); // Espera formato M/D/YYYY ou MM/DD/YYYY
+            if (!dateStr) return new Date(0); // Para lidar com datas vazias
+            const parts = dateStr.split('/'); // Espera formato DD/MM/AAAA
             // new Date(ano, mês-1, dia)
-            return new Date(parseInt(parts[2]), parseInt(parts[0]) - 1, parseInt(parts[1]));
+            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
         };
         try {
             const dateA = parseDate(a['Data comunicação']);
