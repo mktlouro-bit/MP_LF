@@ -27,7 +27,6 @@ async function fetchData() {
         if (errors.length > 0) {
             console.error('Erros ao analisar CSV:', errors);
             // Mostrar aviso no dashboard se houver erros de parsing
-            // Deixamos a mensagem de erro para debug, mas não bloqueamos o dashboard completamente
             document.getElementById('last-updated').textContent = "Erro ao carregar dados! (Consulte a consola)";
             return null; // Retorna nulo se houver erros críticos
         }
@@ -51,8 +50,10 @@ function processData(rawData) {
     const processedCases = [];
 
     rawData.forEach(row => {
+        // console.log("Linha processada:", row); // Temporário para depuração de nomes de colunas
+
         // Ignorar linhas que não têm um número de comunicação válido ou são incompletas
-        // Nota: as chaves são os nomes das colunas EXACTAS do seu Google Sheet
+        // ATUALIZADO: Usando os nomes EXATOS das colunas do CSV
         if (!row['Nº'] || !row['Data comunicação'] || !row['Estado']) {
             console.warn('Linha ignorada devido a dados essenciais incompletos:', row); 
             return;
@@ -63,15 +64,14 @@ function processData(rawData) {
         let finalStatus = 'Desconhecido'; // Estado padrão se não for classificado
 
         const estadoDaReclamacao = row['Estado'].trim().toLowerCase();
-        // Usamos a coluna 'Ok/NO' do seu sheet para determinar OK/NOK
-        // Certifique-se que o nome da coluna 'Ok/NO' está correto (case-sensitive)
-        const okNoStatus = row['Ok/NO'] ? row['Ok/NO'].trim().toLowerCase() : '';
+        // ATUALIZADO: Usando o nome da coluna "Ok/NOK" do CSV
+        const okNoStatus = row['Ok/NOK'] ? row['Ok/NOK'].trim().toLowerCase() : '';
 
         if (estadoDaReclamacao === 'aberto') {
             abertos++;
             finalStatus = 'Aberto';
         } else {
-            // Se o estado não é "Aberto", verificamos a coluna 'Ok/NO'
+            // Se o estado não é "Aberto", verificamos a coluna 'Ok/NOK'
             if (okNoStatus === 'ok') {
                 resolvidosOK++;
                 finalStatus = 'OK';
@@ -79,24 +79,24 @@ function processData(rawData) {
                 resolvidosNOK++;
                 finalStatus = 'NOK';
             } else {
-                // Caso o 'Estado' não seja "Aberto" mas 'Ok/NO' não seja "OK" nem "NOK"
-                // Assumimos como NOK, conforme os critérios iniciais para "Sem resposta" ou "não identificadas as causas"
+                // Caso o 'Estado' não seja "Aberto" mas 'Ok/NOK' não seja "OK" nem "NOK"
                 resolvidosNOK++;
                 finalStatus = 'NOK';
-                console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NO' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
+                console.warn(`Caso ${row['Nº']} com estado '${estadoDaReclamacao}' mas 'Ok/NOK' é '${okNoStatus || 'vazio'}'. Classificado como NOK.`);
             }
         }
         
         // Contar fornecedores para o gráfico
-        const fornecedor = row['Fornecedor'] ? row['Fornecedor'].trim() : 'Desconhecido';
-        if (fornecedor && fornecedor !== 'Desconhecido') { // Só conta se o fornecedor for válido
+        // ATUALIZADO: Usando o nome da coluna "Reclamações a Fornecedores 2026 Fornecedor"
+        const fornecedor = row['Reclamações a Fornecedores 2026 Fornecedor'] ? row['Reclamações a Fornecedores 2026 Fornecedor'].trim() : 'Desconhecido';
+        if (fornecedor && fornecedor !== 'Desconhecido' && fornecedor !== '-') { // Só conta se o fornecedor for válido e não for '-'
             fornecedorCounts[fornecedor] = (fornecedorCounts[fornecedor] || 0) + 1;
         }
 
         processedCases.push({
             'Nº': row['Nº'],
             'Data comunicação': row['Data comunicação'],
-            'Fornecedor': fornecedor,
+            'Fornecedor': fornecedor, // Aqui pode usar o nome da coluna do Google Sheet se for mais fácil, ou o nome limpo 'fornecedor'
             'Motivo': row['Motivo'] || 'N/A', // Se o motivo estiver vazio, usa 'N/A'
             'Estado': finalStatus // Usar o status processado
         });
@@ -106,9 +106,26 @@ function processData(rawData) {
     processedCases.sort((a, b) => {
         const parseDate = (dateStr) => {
             if (!dateStr) return new Date(0); // Para lidar com datas vazias
-            const parts = dateStr.split('/'); // Espera formato DD/MM/AAAA
-            // new Date(ano, mês-1, dia)
-            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+            const parts = dateStr.split('/'); // Espera formato DD/MM/AAAA (seu CSV usa 1/7/2026 -> 1/MM/AAAA)
+            // Note: Seu CSV está a usar MM/DD/AAAA ou D/M/AAAA para "1/7/2026" ou "1/26/2026". 
+            // O JavaScript `new Date()` para "MM/DD/AAAA" funciona melhor. Se o seu Google Sheet 
+            // estiver definido para "DD/MM/AAAA", isto pode causar problemas. Vamos ajustar para tentar
+            // parsear de forma mais robusta.
+            
+            // Tentativa de parse DD/MM/AAAA e MM/DD/AAAA
+            const dateParts = dateStr.split('/');
+            if (dateParts.length === 3) {
+                // Assumindo formato DD/MM/AAAA como é comum em PT
+                const day = parseInt(dateParts[0]);
+                const month = parseInt(dateParts[1]);
+                const year = parseInt(dateParts[2]);
+                // Se o mês for maior que 12, é provável que seja DD/MM/AAAA e não MM/DD/AAAA
+                if (month > 12 && day <= 12) { // Tenta adivinhar se é MM/DD/AAAA
+                    return new Date(year, day - 1, month);
+                }
+                return new Date(year, month - 1, day);
+            }
+            return new Date(dateStr); // Tenta parsear como string genérica
         };
         try {
             const dateA = parseDate(a['Data comunicação']);
