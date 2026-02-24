@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Monitorização de Reclamações</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Papaparse.js para fácil leitura de CSV -->
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Monitorização de Reclamações</h1>
+        <p>Última Atualização: <span id="last-updated">--</span></p>
+    </header>
+
+    <main id="dashboard-container">
+        <!-- KPIs Principais -->
+        <div class="kpi-card">
+            <h2>Casos Totais</h2>
+            <p id="kpi-total-casos" class="kpi-value kpi-total"></p>
+        </div>
+        <div class="kpi-card">
+            <h2>Abertos</h2>
+            <p id="kpi-abertos" class="kpi-value kpi-aberto"></p>
+        </div>
+        <div class="kpi-card">
+            <h2>Resolvidos OK</h2>
+            <p id="kpi-ok" class="kpi-value kpi-ok"></p>
+        </div>
+        <div class="kpi-card">
+            <h2>Resolvidos NOK</h2>
+            <p id="kpi-nok" class="kpi-value kpi-nok"></p>
+        </div>
+
+        <!-- Gráficos -->
+        <div class="chart-panel">
+            <h2>Distribuição de Status</h2>
+            <canvas id="statusChart"></canvas>
+        </div>
+        <div class="chart-panel">
+            <h2>Reclamações por Fornecedor (Top 5)</h2>
+            <canvas id="fornecedorChart"></canvas>
+        </div>
+        
+        <!-- Tabela de Casos Recentes -->
+        <div class="table-panel">
+            <h2>Casos Abertos Recentes</h2>
+            <table id="recentCasesTable">
+                <thead>
+                    <tr>
+                        <th>Data Com.</th>
+                        <th>Fornecedor</th>
+                        <th>Motivo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas da tabela serão preenchidas por JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

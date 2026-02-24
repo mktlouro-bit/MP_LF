@@ -1,0 +1,140 @@
+:root {
+    --bg-color: #f0f2f5;
+    --card-bg: #ffffff;
+    --text-color: #333;
+    --header-bg: #007bff;
+    --header-text: #ffffff;
+    --kpi-ok: #28a745;
+    --kpi-nok: #dc3545;
+    --kpi-aberto: #ffc107;
+    --kpi-total: #6c757d;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 20px 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+    margin: 0 0 5px 0;
+    font-size: 1.8em; /* Ajustado para tablet */
+}
+
+header p {
+    font-size: 0.9em;
+    opacity: 0.8;
+}
+
+#dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* 250px min para tablets */
+    gap: 20px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+}
+
+.kpi-card, .chart-panel, .table-panel {
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-card {
+    text-align: center;
+}
+
+.kpi-card h2 {
+    font-size: 1.1em;
+    color: #666;
+    margin-top: 0;
+}
+
+.kpi-value {
+    font-size: 2.5em; /* Grande para fácil leitura */
+    font-weight: bold;
+    margin: 10px 0 0 0;
+}
+
+.kpi-ok { color: var(--kpi-ok); }
+.kpi-nok { color: var(--kpi-nok); }
+.kpi-aberto { color: var(--kpi-aberto); }
+.kpi-total { color: var(--kpi-total); }
+
+.chart-panel h2, .table-panel h2 {
+    font-size: 1.2em;
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #444;
+}
+
+/* Responsividade para layouts em tablets */
+@media (min-width: 768px) {
+    #dashboard-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 colunas para tablets */
+    }
+    .chart-panel, .table-panel {
+        grid-column: span 1; /* Ocupam uma coluna */
+    }
+    /* Em tablets maiores ou desktops, podem ocupar mais */
+    @media (min-width: 1024px) {
+        #dashboard-container {
+            grid-template-columns: repeat(3, 1fr); /* 3 colunas para desktops */
+        }
+        .chart-panel, .table-panel {
+             grid-column: span 1; /* Ocupam uma coluna */
+        }
+        /* Para o statusChart e talvez a tabela, podemos dar mais largura */
+        .chart-panel:nth-child(5) { /* O quinto elemento (primeiro chart) */
+            grid-column: span 2; 
+        }
+        .table-panel:nth-child(7) { /* O sétimo elemento (tabela) */
+            grid-column: span 3; /* Tabela ocupa toda a largura */
+        }
+    }
+}
+
+/* Estilos da tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+th, td {
+    border: 1px solid #eee;
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f8f8f8;
+    font-weight: bold;
+    color: #555;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fbfbfb;
+}
+
+.table-status-aberto { color: var(--kpi-aberto); font-weight: bold; }
+.table-status-ok { color: var(--kpi-ok); font-weight: bold; }
+.table-status-nok { color: var(--kpi-nok); font-weight: bold; }
